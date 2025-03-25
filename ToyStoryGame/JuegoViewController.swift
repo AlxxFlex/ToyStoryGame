@@ -6,9 +6,13 @@
 //
 
 import UIKit
+import AVFoundation
 
 class JuegoViewController: UIViewController {
-
+    
+    var sonidoOof: AVAudioPlayer?
+    var backgroundMusicPlayer: AVAudioPlayer?
+    
     @IBOutlet weak var stackTeclado: UIStackView!
     @IBOutlet weak var stackLineas: UIStackView!
     @IBOutlet weak var ahorcadoImageView: UIImageView!
@@ -22,9 +26,19 @@ class JuegoViewController: UIViewController {
 
         override func viewDidLoad() {
             super.viewDidLoad()
+            playBackgroundMusic()
             mostrarLineas()
             crearTeclado()
             actualizarImagenAhorcado()
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: Notification.Name("AppDidEnterBackground"), object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: Notification.Name("AppWillEnterForeground"), object: nil)
+        }
+
+        override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            backgroundMusicPlayer?.stop()
+            NotificationCenter.default.removeObserver(self)
         }
 
         func actualizarImagenAhorcado() {
@@ -134,6 +148,7 @@ class JuegoViewController: UIViewController {
 
             } else {
                 vidas -= 1
+                reproducirOof()
                 if vidas == 0 {
                     mostrarAlerta(titulo: "Perdiste", mensaje: "La palabra era \(palabraSecreta).")
                 }
@@ -172,4 +187,43 @@ class JuegoViewController: UIViewController {
                 }
             }
         }
+    
+    // MARK: - Sonidos
+    
+    func reproducirOof() {
+        guard let url = Bundle.main.url(forResource: "ROBLOX Oof Sound Effect", withExtension: "mp3") else {
+            print("no se encontró")
+            return
+        }
+        
+        do {
+            sonidoOof = try AVAudioPlayer(contentsOf: url)
+            sonidoOof?.volume = 1.0
+            sonidoOof?.play()
+        } catch {
+            print("error: \(error)")
+        }
     }
+    
+    func playBackgroundMusic() {
+        if let path = Bundle.main.path(forResource: "juego", ofType: "mp3") {
+            let url = URL(fileURLWithPath: path)
+            do {
+                backgroundMusicPlayer = try AVAudioPlayer(contentsOf: url)
+                backgroundMusicPlayer?.numberOfLoops = -1
+                backgroundMusicPlayer?.play()
+            } catch {
+                print("No se pudo reproducir la música de fondo: \(error)")
+            }
+        }
+    }
+    
+    
+    @objc func appDidEnterBackground() {
+        backgroundMusicPlayer?.pause()
+    }
+
+    @objc func appWillEnterForeground() {
+        backgroundMusicPlayer?.play()
+    }
+}

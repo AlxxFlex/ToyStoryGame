@@ -20,6 +20,12 @@ class MenuViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: Notification.Name("AppWillEnterForeground"), object: nil)
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        backgroundMusicPlayer?.stop()
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     // MARK: - Música
     
     func playBackgroundMusic() {
