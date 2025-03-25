@@ -66,6 +66,9 @@
                                     <fontDescription key="titleFontDescription" name="Futura-Bold" family="Futura" pointSize="26"/>
                                     <color key="baseBackgroundColor" systemColor="systemPurpleColor"/>
                                 </buttonConfiguration>
+                                <connections>
+                                    <segue destination="RzJ-Gx-xmX" kind="presentation" modalPresentationStyle="fullScreen" id="3Va-8A-YsY"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pk7-1O-fdl">
                                 <rect key="frame" x="82.666666666666671" y="417.66666666666669" width="248.66666666666663" height="71"/>
@@ -76,7 +79,7 @@
                                     <color key="baseBackgroundColor" systemColor="systemPurpleColor"/>
                                 </buttonConfiguration>
                                 <connections>
-                                    <segue destination="vtb-Dj-gNi" kind="presentation" modalPresentationStyle="fullScreen" id="WD9-q7-JNm"/>
+                                    <segue destination="vtb-Dj-gNi" kind="presentation" id="WD9-q7-JNm"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i9A-Z3-PRL">
@@ -114,24 +117,52 @@
                             <constraint firstItem="7Mv-JW-XGw" firstAttribute="centerY" secondItem="0gk-2x-lcV" secondAttribute="centerY" multiplier="0.75" id="yCd-xo-2qA"/>
                         </constraints>
                     </view>
-                    <connections>
-                        <segue destination="RzJ-Gx-xmX" kind="presentation" id="3h5-r8-zvT"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FGB-U4-grI" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="975" y="-2"/>
         </scene>
-        <!--View Controller-->
+        <!--Juego View Controller-->
         <scene sceneID="nKM-57-I2n">
             <objects>
-                <viewController id="RzJ-Gx-xmX" sceneMemberID="viewController">
+                <viewController id="RzJ-Gx-xmX" customClass="JuegoViewController" customModule="ToyStoryGame" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="oxZ-EP-5PL">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="7.png" translatesAutoresizingMaskIntoConstraints="NO" id="gZj-tr-PVb">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QBK-De-mWR">
+                                <rect key="frame" x="0.0" y="388" width="414" height="120"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="120" id="kgs-kv-w49"/>
+                                </constraints>
+                            </stackView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="xIh-b6-6k9">
+                                <rect key="frame" x="0.0" y="625" width="414" height="251"/>
+                            </stackView>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6El-CE-CoG"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                        <constraints>
+                            <constraint firstItem="gZj-tr-PVb" firstAttribute="top" secondItem="6El-CE-CoG" secondAttribute="top" id="3qB-7d-eja"/>
+                            <constraint firstItem="xIh-b6-6k9" firstAttribute="leading" secondItem="6El-CE-CoG" secondAttribute="leading" id="8ym-q5-mJx"/>
+                            <constraint firstItem="6El-CE-CoG" firstAttribute="trailing" secondItem="gZj-tr-PVb" secondAttribute="trailing" id="JkJ-hL-aEs"/>
+                            <constraint firstItem="xIh-b6-6k9" firstAttribute="height" secondItem="gZj-tr-PVb" secondAttribute="height" multiplier="0.28" id="KQh-zX-m8j"/>
+                            <constraint firstItem="QBK-De-mWR" firstAttribute="centerX" secondItem="oxZ-EP-5PL" secondAttribute="centerX" id="Rx9-uh-pU5"/>
+                            <constraint firstItem="gZj-tr-PVb" firstAttribute="leading" secondItem="6El-CE-CoG" secondAttribute="leading" id="WGq-HR-ZLZ"/>
+                            <constraint firstItem="6El-CE-CoG" firstAttribute="bottom" secondItem="gZj-tr-PVb" secondAttribute="bottom" id="kBp-mH-2Pk"/>
+                            <constraint firstItem="6El-CE-CoG" firstAttribute="trailing" secondItem="xIh-b6-6k9" secondAttribute="trailing" id="kjG-B4-kSt"/>
+                            <constraint firstItem="QBK-De-mWR" firstAttribute="centerY" secondItem="oxZ-EP-5PL" secondAttribute="centerY" id="lIy-2D-Gqw"/>
+                            <constraint firstItem="6El-CE-CoG" firstAttribute="bottom" secondItem="xIh-b6-6k9" secondAttribute="bottom" constant="20" id="we2-BN-Mcf"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="ahorcadoImageView" destination="gZj-tr-PVb" id="A1t-yV-rSn"/>
+                        <outlet property="stackLineas" destination="QBK-De-mWR" id="lfJ-sf-X3S"/>
+                        <outlet property="stackTeclado" destination="xIh-b6-6k9" id="iAF-Vw-GsQ"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3KR-yD-xLW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -157,62 +188,55 @@
             <objects>
                 <viewController id="vtb-Dj-gNi" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="HYL-At-jgG">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="7.png" translatesAutoresizingMaskIntoConstraints="NO" id="wEy-xt-fUP">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Angel Heriberto Rivera Saucedo" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KrU-4b-IvR">
-                                <rect key="frame" x="30" y="547.66666666666663" width="354" height="89.666666666666629"/>
+                                <rect key="frame" x="30" y="541.66666666666663" width="354" height="88.666666666666629"/>
                                 <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="18"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="23170062" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wCx-eh-0oy">
-                                <rect key="frame" x="30" y="637.33333333333337" width="354" height="44.666666666666629"/>
+                                <rect key="frame" x="30" y="630.33333333333337" width="354" height="44.333333333333371"/>
                                 <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="16"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="17" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tPU-Fu-FsJ">
-                                <rect key="frame" x="30" y="10" width="354" height="403.33333333333331"/>
-                                <attributedString key="attributedText">
-                                    <fragment>
-                                        <string key="content">¿Cómo jugar al Ahorcado?
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="17" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tPU-Fu-FsJ">
+                                <rect key="frame" x="30" y="10" width="354" height="398.66666666666669"/>
+                                <string key="text">¿Cómo jugar al Ahorcado?
 Adivina la palabra secreta letra por letra.
 Cada error dibuja una parte del ahorcado.
 Tienes un número limitado de intentos.
 ¡Gana si completas la palabra antes de que el dibujo esté completo!</string>
-                                        <attributes>
-                                            <color key="NSColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <font key="NSFont" size="18" name="Futura-Bold"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                </attributedString>
+                                <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="18"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Aaron Alejandro Martinez Solis" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vB6-EC-QmR">
-                                <rect key="frame" x="30" y="413.33333333333331" width="354" height="89.333333333333314"/>
+                                <rect key="frame" x="30" y="408.66666666666669" width="354" height="88.666666666666686"/>
                                 <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="18"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="23170050" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vj4-ui-wzA">
-                                <rect key="frame" x="30" y="502.66666666666674" width="354" height="45"/>
+                                <rect key="frame" x="30" y="497.33333333333331" width="354" height="44.333333333333314"/>
                                 <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="16"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Maximiliano Rodriguez Marquez" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yZ0-GT-hc3">
-                                <rect key="frame" x="30" y="682" width="354" height="89.666666666666629"/>
+                                <rect key="frame" x="30" y="674.66666666666663" width="354" height="88.333333333333371"/>
                                 <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="18"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="23170043" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MCm-Hk-tBH">
-                                <rect key="frame" x="30" y="771.66666666666663" width="354" height="21"/>
+                                <rect key="frame" x="30" y="763" width="354" height="21"/>
                                 <fontDescription key="fontDescription" name="Futura-Bold" family="Futura" pointSize="16"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
