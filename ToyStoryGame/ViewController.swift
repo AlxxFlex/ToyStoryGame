@@ -31,7 +31,7 @@ class ViewController: UIViewController {
         Splashimg.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         Splashimg.alpha = 0.0
 
-        UIView.animate(withDuration: 3,
+        UIView.animate(withDuration: 2,
                        delay: 0.0,
                        usingSpringWithDamping: 0.6,
                        initialSpringVelocity: 0.5,
@@ -40,7 +40,7 @@ class ViewController: UIViewController {
             self.Splashimg.transform = .identity
             self.Splashimg.alpha = 1.0
         } completion: { _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 self.performSegue(withIdentifier: "sgSplash", sender: nil)
             }
         }
