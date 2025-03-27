@@ -39,15 +39,22 @@ class AjustesModalViewController: UIViewController {
             dismiss(animated: true)
     }
     @IBAction func reiniciarGame(_ sender: Any) {
-        juegoViewController?.reiniciarJuego()
+        guard let juegoVC = juegoViewController else { return }
+        if juegoVC.puntajeAcumulado > 0 {
+            juegoVC.verificarNuevoRecord(puntaje: juegoVC.puntajeAcumulado)
+        }
+
+        juegoVC.reiniciarJuego()
         dismiss(animated: true)
     }
     @IBAction func irMenu(_ sender: Any) {
+        guard let juegoVC = juegoViewController else { return }
+        juegoVC.verificarNuevoRecord(puntaje: juegoVC.puntajeAcumulado)
         dismiss(animated: true) {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let menuVC = storyboard.instantiateViewController(withIdentifier: "MenuView")
             menuVC.modalPresentationStyle = .fullScreen
-            self.juegoViewController?.present(menuVC, animated: true, completion: nil)
+            juegoVC.present(menuVC, animated: true, completion: nil)
         }
     }
 

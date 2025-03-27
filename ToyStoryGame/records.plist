@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   records.plist
+   ToyStoryGame
+
+   Created by Aaron Alejandro Martinez Solis on 27/03/25.
+   Copyright (c) 2025 ___ORGANIZATIONNAME___. All rights reserved.
+-->
+<plist version="1.0">
+<array>
+    <dict>
+        <key>nombre</key>
+        <string>Jugador1</string>
+        <key>puntaje</key>
+        <integer>120</integer>
+    </dict>
+    <dict>
+        <key>nombre</key>
+        <string>Jugador2</string>
+        <key>puntaje</key>
+        <integer>100</integer>
+    </dict>
+    <dict>
+        <key>nombre</key>
+        <string>Jugador3</string>
+        <key>puntaje</key>
+        <integer>80</integer>
+    </dict>
+    <dict>
+        <key>nombre</key>
+        <string>Jugador4</string>
+        <key>puntaje</key>
+        <integer>70</integer>
+    </dict>
+    <dict>
+        <key>nombre</key>
+        <string>Jugador5</string>
+        <key>puntaje</key>
+        <integer>60</integer>
+    </dict>
+</array>
+</plist>
