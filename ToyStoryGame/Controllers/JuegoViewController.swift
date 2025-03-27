@@ -12,6 +12,7 @@ class JuegoViewController: UIViewController {
     
     var sonidoOof: AVAudioPlayer?
     var backgroundMusicPlayer: AVAudioPlayer?
+    var musicaActiva = true
     
     @IBOutlet weak var stackTeclado: UIStackView!
     @IBOutlet weak var stackLineas: UIStackView!
@@ -41,7 +42,10 @@ class JuegoViewController: UIViewController {
             NotificationCenter.default.removeObserver(self)
         }
 
-        func actualizarImagenAhorcado() {
+    @IBAction func ajustesBoton(_ sender: Any) {
+        performSegue(withIdentifier: "sgAjustes", sender: self)
+    }
+    func actualizarImagenAhorcado() {
             ahorcadoImageView.image = UIImage(named: "ahorcado_\(3 - vidas)")
         }
 
@@ -163,8 +167,11 @@ class JuegoViewController: UIViewController {
             }))
 
             alerta.addAction(UIAlertAction(title: "🏠 Ir al menú", style: .cancel, handler: { _ in
-                self.navigationController?.popViewController(animated: true)
-                // o self.dismiss(animated: true)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let menuVC = storyboard.instantiateViewController(withIdentifier: "MenuView") as? UIViewController {
+                    menuVC.modalPresentationStyle = .fullScreen
+                    self.present(menuVC, animated: true, completion: nil)
+                }
             }))
 
             present(alerta, animated: true, completion: nil)
@@ -185,6 +192,11 @@ class JuegoViewController: UIViewController {
                         }
                     }
                 }
+            }
+        }
+        override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            if segue.identifier == "sgAjustes", let destino = segue.destination as? AjustesModalViewController {
+                destino.juegoViewController = self
             }
         }
     
@@ -224,6 +236,8 @@ class JuegoViewController: UIViewController {
     }
 
     @objc func appWillEnterForeground() {
-        backgroundMusicPlayer?.play()
+        if musicaActiva {
+            backgroundMusicPlayer?.play()
+        }
     }
 }
