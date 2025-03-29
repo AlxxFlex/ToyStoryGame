@@ -208,7 +208,7 @@ class JuegoViewController: UIViewController {
             intentosFallidos += 1
             reproducirOof()
             actualizarImagenAhorcado()
-            if intentosFallidos >= 3 {
+            if intentosFallidos >= 5 {
                 vidas -= 1
                 intentosFallidos = 0
                 actualizarVidas()
