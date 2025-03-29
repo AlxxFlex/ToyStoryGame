@@ -9,6 +9,7 @@ import UIKit
 
 class NewRecordViewController: UIViewController {
 
+    var completionHandler: (() -> Void)?
     @IBOutlet weak var txtNombre: UITextField!
     var puntajeNuevo: Int?
     override func viewDidLoad() {
@@ -18,47 +19,90 @@ class NewRecordViewController: UIViewController {
     }
     
     @IBAction func BtnGuardarRecord(_ sender: Any) {guard let nombre = txtNombre.text, !nombre.isEmpty, let puntaje = puntajeNuevo else { return }
-            // Cargar récords actuales
-            var records = cargarRecords()
-
-            // Agregar nuevo récord
-            let nuevoRecord: [String: Any] = ["nombre": nombre, "puntaje": puntaje]
-            records.append(nuevoRecord)
-
-            // Ordenar y limitar a top 5
-            records.sort { ($0["puntaje"] as? Int ?? 0) > ($1["puntaje"] as? Int ?? 0) }
-            if records.count > 5 {
-                records.removeLast()
-            }
-
-            // Guardar en el plist
-            guardarRecords(records)
-            
-            // ✅ Regresar al menú después de guardar récord
-            irMenu()
+        
+        var records = cargarRecords()
+        let nuevoRecord: [String: Any] = ["nombre": nombre, "puntaje": puntaje]
+        records.append(nuevoRecord)
+        records.sort { ($0["puntaje"] as? Int ?? 0) > ($1["puntaje"] as? Int ?? 0) }
+        if records.count > 5 {
+            records.removeLast()
         }
-    // Copia estas funciones en NewRecordViewController.swift
+        guardarRecords(records)
+        if let juegoVC = presentingViewController as? JuegoViewController {
+            if juegoVC.vidas == 0 {
+                juegoVC.perdioAlHacerRecord = true
+            } else {
+                juegoVC.perdioAlHacerRecord = false
+            }
+            completionHandler?()
+            if juegoVC.musicaActiva {
+                juegoVC.backgroundMusicPlayer?.play()
+            }
+        }
+        dismiss(animated: true, completion: nil)
+    }
+        
     func cargarRecords() -> [[String: Any]] {
-        guard let path = Bundle.main.path(forResource: "records", ofType: "plist"),
-              let data = FileManager.default.contents(atPath: path) else { return [] }
+        copiarPlistSiEsNecesario()
+        
+        guard let url = obtenerRutaPlist(),
+              FileManager.default.fileExists(atPath: url.path),
+              let data = FileManager.default.contents(atPath: url.path) else {
+            print("No se encontró el archivo records.plist en Document Directory")
+            return []
+        }
+        
         do {
             if let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [[String: Any]] {
+                print("Datos cargados: \(plist)")
                 return plist
             }
         } catch {
             print("Error al leer records.plist: \(error)")
         }
+        
         return []
+    }
+    func copiarPlistSiEsNecesario() {
+        let fileManager = FileManager.default
+        guard let urlDestino = obtenerRutaPlist(),
+              !fileManager.fileExists(atPath: urlDestino.path) else {
+            return
+        }
+        
+        
+        if let urlOrigen = Bundle.main.url(forResource: "records", withExtension: "plist") {
+            do {
+                try fileManager.copyItem(at: urlOrigen, to: urlDestino)
+                print("records.plist copiado correctamente a Document Directory")
+            } catch {
+                print("Error al copiar records.plist: \(error)")
+            }
+        } else {
+            print("No se encontró records.plist en el Bundle")
+        }
     }
 
     func guardarRecords(_ records: [[String: Any]]) {
-        guard let path = Bundle.main.path(forResource: "records", ofType: "plist") else { return }
+        guard let url = obtenerRutaPlist() else {
+            print("No se pudo obtener la ruta para guardar records.plist")
+            return
+        }
+        
         do {
             let data = try PropertyListSerialization.data(fromPropertyList: records, format: .xml, options: 0)
-            try data.write(to: URL(fileURLWithPath: path))
+            try data.write(to: url)
+            print(" Datos guardados correctamente en: \(url.path)")
         } catch {
-            print("Error al guardar records.plist: \(error)")
+            print(" Error al guardar records.plist: \(error)")
         }
+    }
+    func obtenerRutaPlist() -> URL? {
+        
+        if let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("records.plist") {
+            return path
+        }
+        return nil
     }
     @objc func irMenu() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)

@@ -16,7 +16,11 @@ class JuegoViewController: UIViewController {
     var tiempoTranscurrido = 0
     var temporizador: Timer?
     var puntajeAcumulado = 0
+    var intentosFallidos = 0
+    var reiniciandoJuego = false
+    var perdioAlHacerRecord = false
     
+    @IBOutlet weak var VidasLbl: UILabel!
     @IBOutlet weak var PuntosLbl: UILabel!
     @IBOutlet weak var TimeLbl: UILabel!
     @IBOutlet weak var stackTeclado: UIStackView!
@@ -24,7 +28,16 @@ class JuegoViewController: UIViewController {
     @IBOutlet weak var ahorcadoImageView: UIImageView!
  
     let palabrasToyStory = [
-        "ARBOL","ADIOS","ALERTA","LARGO","MALDICION","TERMO"
+        "AVENTURA", "ANIMADOR", "BALCONES", "CAMPEON", "CENIZAS",
+        "DESAFIO", "DIAGRAMA", "DOMINIOS", "ESFERICO", "ESTORNOS",
+        "FANTASMA", "FLECHAZO", "FUGITIVO", "GLACIAL", "GUERRERO",
+        "HERENCIA", "HISTORIA", "ILUSION", "IMPERIOS", "JARDINES",
+        "JORNADAS", "JUGUETES", "LABERINT", "LENGUAJE", "LUZBELIA",
+        "MAGNOLIA", "MISTERIO", "MONTAÑAS", "NOVEDOSA", "OBSTACULO",
+        "OCULTADO", "ORGULLOS", "PELIGROS", "PIRATAS", "POLITICA",
+        "PRIMAVERA", "PROYECTO", "QUIMERAS", "RAZONADO", "REGISTRO",
+        "RELIQUIA", "REQUIERO", "SAGRARIO", "SECRETOS", "SILENCIO",
+        "TRADICION", "TURMALINA", "UNIFORME", "VENCIDOS", "VIGILADO"
     ]
     
     var palabraSecreta = ""
@@ -40,9 +53,23 @@ class JuegoViewController: UIViewController {
         super.viewDidLoad()
         playBackgroundMusic()
         iniciarJuego()
+        actualizarVidas()
         
         NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: Notification.Name("AppDidEnterBackground"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: Notification.Name("AppWillEnterForeground"), object: nil)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if musicaActiva && backgroundMusicPlayer?.isPlaying == false {
+            backgroundMusicPlayer?.play()
+        }
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if perdioAlHacerRecord {
+            mostrarAlertaFinal()
+            perdioAlHacerRecord = false
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -58,27 +85,30 @@ class JuegoViewController: UIViewController {
     func iniciarJuego() {
         palabraSecreta = palabrasToyStory.randomElement()!
         letrasAdivinadas = []
-        vidas = 3
+        intentosFallidos = 0
         tiempoTranscurrido = 0
         mostrarLineas()
         crearTeclado()
         actualizarImagenAhorcado()
+        actualizarVidas()
         iniciarTemporizador()
         actualizarPuntaje()
+    }
+    func actualizarVidas() {
+        VidasLbl.text = "Vidas: \(vidas)"
     }
         
         
     func actualizarImagenAhorcado() {
-            ahorcadoImageView.image = UIImage(named: "ahorcado_\(3 - vidas)")
-        }
+        let intentosUsados = intentosFallidos
+        ahorcadoImageView.image = UIImage(named: "ahorcado_\(intentosUsados)")
+    }
 
     func mostrarLineas() {
         stackLineas.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
         let longitud = palabraSecreta.count
-        let maxPorFila = 7 // Si hay más de esto, se hace 2 filas
-
-        // Divide letras en 1 o 2 filas
+        let maxPorFila = 7
         let letras = Array(palabraSecreta)
         let mitad = letras.count / 2 + letras.count % 2
 
@@ -168,37 +198,38 @@ class JuegoViewController: UIViewController {
         if palabraSecreta.contains(letra) {
             letrasAdivinadas.append(letra)
             mostrarLineas()
-
             if palabraSecreta.allSatisfy({ letrasAdivinadas.contains(String($0)) }) {
-                // Si adivina la palabra, actualiza puntaje y continúa con otra palabra
-                let puntajeFinal = calcularPuntaje(palabra: palabraSecreta, tiempo: tiempoTranscurrido, errores: 3 - vidas)
+                let puntajeFinal = calcularPuntaje(palabra: palabraSecreta, tiempo: tiempoTranscurrido, errores: intentosFallidos)
                 puntajeAcumulado += puntajeFinal
                 actualizarPuntaje()
                 iniciarJuego()
             }
         } else {
-            vidas -= 1
+            intentosFallidos += 1
             reproducirOof()
-            
-            if vidas == 0 {
-                detenerTemporizador()
-                verificarNuevoRecordAntesDeAlerta()
+            actualizarImagenAhorcado()
+            if intentosFallidos >= 3 {
+                vidas -= 1
+                intentosFallidos = 0
+                actualizarVidas()
+                if vidas == 0 {
+                    detenerTemporizador()
+                    verificarNuevoRecordAntesDeAlerta()
+                } else {
+                    mostrarAlertaIntentosFallidos()
+                }
             }
         }
     }
     
-    // Actualizar puntaje en pantalla
     func actualizarPuntaje() {
         PuntosLbl.text = "Puntaje: \(puntajeAcumulado)"
     }
     
     func verificarNuevoRecordAntesDeAlerta() {
         var records = cargarRecords()
-        
-        // Ordenar récords para comparar con el menor
         records.sort { ($0["puntaje"] as? Int ?? 0) > ($1["puntaje"] as? Int ?? 0) }
         
-        // Verifica si es nuevo récord
         if records.count < 5 || puntajeAcumulado > (records.last?["puntaje"] as? Int ?? 0) {
             mostrarPantallaNuevoRecord(puntaje: puntajeAcumulado)
         } else {
@@ -206,61 +237,99 @@ class JuegoViewController: UIViewController {
         }
     }
     
-    // Verificación de récord
     func verificarNuevoRecord(puntaje: Int) {
+        if reiniciandoJuego {
+            return
+        }
+        
         var records = cargarRecords()
-        
-        // Ordenar de mayor a menor para comparar con el menor
         records.sort { ($0["puntaje"] as? Int ?? 0) > ($1["puntaje"] as? Int ?? 0) }
-        
-        // Si hay menos de 5 récords o el puntaje supera el menor
         if records.count < 5 || puntaje > (records.last?["puntaje"] as? Int ?? 0) {
             mostrarPantallaNuevoRecord(puntaje: puntaje)
         } else {
             mostrarAlertaFinal()
         }
     }
-    
-    // Mostrar pantalla para nuevo récord
+
+    func mostrarAlertaIntentosFallidos() {
+        let alerta = UIAlertController(
+            title: "Fallaste",
+            message: "Perdiste 1 vida al no adivinar la palabra '\(palabraSecreta)'.",
+            preferredStyle: .alert
+        )
+        
+        alerta.addAction(UIAlertAction(title: "Continuar", style: .default, handler: { _ in
+            self.iniciarJuego()
+        }))
+        
+        present(alerta, animated: true, completion: nil)
+    }
     func mostrarPantallaNuevoRecord(puntaje: Int) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let recordVC = storyboard.instantiateViewController(withIdentifier: "NewRecordViewController") as? NewRecordViewController {
             recordVC.puntajeNuevo = puntaje
             recordVC.modalPresentationStyle = .fullScreen
+            recordVC.completionHandler = { [weak self] in
+                guard let self = self else { return }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    if self.perdioAlHacerRecord {
+                        self.mostrarAlertaFinal()
+                    } else {
+                        self.reiniciarJuego() 
+                    }
+                }
+            }
+            
             present(recordVC, animated: true, completion: nil)
         }
     }
-
-    
-    // Alerta cuando pierdes
     func mostrarAlertaFinal() {
-        let alerta = UIAlertController(title: "Perdiste", message: "Tu puntaje fue: \(puntajeAcumulado)", preferredStyle: .alert)
-        
-        alerta.addAction(UIAlertAction(title: "🔁 Reintentar", style: .default, handler: { _ in
-            self.reiniciarJuego()
-        }))
-        
-        alerta.addAction(UIAlertAction(title: "🏠 Ir al menú", style: .cancel, handler: { _ in
-            self.irMenuPrincipal()
-        }))
-        
-        present(alerta, animated: true, completion: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if self.presentedViewController == nil {
+                let alerta = UIAlertController(title: "Perdiste", message: "Tu puntaje fue: \(self.puntajeAcumulado)", preferredStyle: .alert)
+                
+                alerta.addAction(UIAlertAction(title: "🔁 Reintentar", style: .default, handler: { _ in
+                    self.reiniciarJuego()
+                }))
+                
+                alerta.addAction(UIAlertAction(title: "🏠 Ir al menú", style: .cancel, handler: { _ in
+                    self.irMenuPrincipal()
+                }))
+                
+                self.present(alerta, animated: true, completion: nil)
+            } else {
+                print("⚠️ Alerta no presentada porque hay otra vista activa.")
+            }
+        }
     }
-
-    // ✅ Reiniciar juego correctamente
     func reiniciarJuego() {
+        reiniciandoJuego = true
         puntajeAcumulado = 0
+        vidas = 3
+        actualizarVidas()
         iniciarJuego()
+        reiniciandoJuego = false
     }
-
-    // ✅ Ir al menú después de perder
     func irMenuPrincipal() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let menuVC = storyboard.instantiateViewController(withIdentifier: "MenuView")
         menuVC.modalPresentationStyle = .fullScreen
         present(menuVC, animated: true, completion: nil)
     }
-
+    func verificarNuevoRecordDesdeAjustes(puntaje: Int, completion: @escaping () -> Void) {
+        if reiniciandoJuego {
+            completion()
+            return
+        }
+        var records = cargarRecords()
+        records.sort { ($0["puntaje"] as? Int ?? 0) > ($1["puntaje"] as? Int ?? 0) }
+        if records.count < 5 || puntaje > (records.last?["puntaje"] as? Int ?? 0) {
+            mostrarPantallaNuevoRecord(puntaje: puntaje)
+        } else {
+            completion()
+        }
+    }
     // MARK: - Temporizador
     func iniciarTemporizador() {
         tiempoTranscurrido = 0
@@ -317,88 +386,42 @@ class JuegoViewController: UIViewController {
     }
     // MARK: - PLIST - GUARDAR RECORDS
 
-    // ✅ Obtener ruta de records.plist en Document Directory
+    
     func obtenerRutaPlist() -> URL? {
-        // Obtener ruta del directorio Document Directory
+        
         if let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("records.plist") {
             return path
         }
         return nil
     }
-    func mostrarRutaPlist() {
-        if let url = obtenerRutaPlist() {
-            print("📂 Ruta de records.plist: \(url.path)")
-        } else {
-            print("❌ No se pudo obtener la ruta del plist")
-        }
-    }
+  
 
-    // ✅ Cargar récords desde records.plist
     func cargarRecords() -> [[String: Any]] {
-        // Copiar el archivo si no existe en Document Directory
-        copiarPlistSiEsNecesario()
-        
         guard let url = obtenerRutaPlist(),
               FileManager.default.fileExists(atPath: url.path),
               let data = FileManager.default.contents(atPath: url.path) else {
-            print("❌ No se encontró el archivo records.plist en Document Directory")
+            print("No se encontró el archivo records.plist en Document Directory")
             return []
         }
         
         do {
             if let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [[String: Any]] {
-                print("📚 Datos cargados: \(plist)")
+                print("Datos cargados: \(plist)")
                 return plist
             }
         } catch {
-            print("❌ Error al leer records.plist: \(error)")
+            print("Error al leer records.plist: \(error)")
         }
         
         return []
     }
-
-    // ✅ Guardar récords en records.plist
-    func guardarRecords(_ records: [[String: Any]]) {
-        guard let url = obtenerRutaPlist() else {
-            print("❌ No se pudo obtener la ruta para guardar records.plist")
-            return
-        }
-        
-        do {
-            let data = try PropertyListSerialization.data(fromPropertyList: records, format: .xml, options: 0)
-            try data.write(to: url)
-            print("✅ Datos guardados correctamente en: \(url.path)")
-            mostrarRutaPlist() // ✅ Verifica la ruta después de guardar
-        } catch {
-            print("❌ Error al guardar records.plist: \(error)")
-        }
-    }
-    // ✅ Copiar records.plist desde el Bundle si no existe en Document Directory
-    func copiarPlistSiEsNecesario() {
-        let fileManager = FileManager.default
-        guard let urlDestino = obtenerRutaPlist(),
-              !fileManager.fileExists(atPath: urlDestino.path) else {
-            return
-        }
-        
-        // Obtener ruta del plist en el Bundle
-        if let urlOrigen = Bundle.main.url(forResource: "records", withExtension: "plist") {
-            do {
-                try fileManager.copyItem(at: urlOrigen, to: urlDestino)
-                print("✅ records.plist copiado correctamente a Document Directory")
-            } catch {
-                print("❌ Error al copiar records.plist: \(error)")
-            }
-        } else {
-            print("❌ No se encontró records.plist en el Bundle")
-        }
-    }
+    
     
     // MARK: - CALCULAR PUNTAJE
     func calcularPuntaje(palabra: String, tiempo: Int, errores: Int) -> Int {
         var puntaje = 0
         
-        // Puntos base por longitud
+        
         switch palabra.count {
         case 5...6:
             puntaje += 10
@@ -410,7 +433,7 @@ class JuegoViewController: UIViewController {
             puntaje += 5
         }
         
-        // Bonificación por errores
+        
         switch errores {
         case 0:
             puntaje += 10
@@ -422,7 +445,7 @@ class JuegoViewController: UIViewController {
             puntaje += 0
         }
         
-        // Bonificación por tiempo
+        
         if tiempo < 10 {
             puntaje += 10
         } else if tiempo <= 20 {

@@ -25,6 +25,9 @@ class MenuViewController: UIViewController {
         backgroundMusicPlayer?.stop()
         NotificationCenter.default.removeObserver(self)
     }
+    @IBAction func Verrecords(_ sender: Any) {
+    performSegue(withIdentifier: "sgRecords", sender: self)
+    }
     
     // MARK: - Música
     
